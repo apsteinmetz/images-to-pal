@@ -1,0 +1,77 @@
+---
+title: "image_to_pal"
+output: 
+  html_notebook:
+  fig_caption: TRUE
+---
+load libraries
+```{r warning=FALSE}
+library(tidyverse)
+library(jpeg)
+```
+Load mulitple images.  They are all Google image search thumbnails so the size is the same.  This matters since we are combining images a larger image would have a disproportional weight in our analysis.
+
+I first thought that, since I am combining multiple images to get one palette, I needed to tile the images then process.  No. We just care about the pixel color values so it really doesn't matter what position they are in.  The most efficient approach is to just chain all the RGB values together. Duh.
+```{r}
+rm_list<-list()
+for (n in 1:6){
+  print(paste0("img/rm",n,".jpg"))
+  img<-jpeg::readJPEG(paste0("img/rm",n,".jpg"))
+  R<-as.vector(img[,,1])
+  G<-as.vector(img[,,2])
+  B<-as.vector(img[,,3])
+  rm_list<-bind_rows(data_frame(img=n,R,G,B),rm_list) %>% 
+    arrange(img)
+}
+
+
+```
+#Show Me What You Got
+For fun let's do some density plots of the color values.
+```{r}
+#make data tidy first
+rm_tidy <- rm_list %>% gather("color","level",-img)
+ggplot(rm_tidy,aes(x=level,fill=color))+
+  geom_density(alpha=0.7) + 
+  scale_fill_manual(values=c("blue","green","red")) + 
+  theme_void()
+
+```
+
+We can see some evidence of bimodality, a preference for very bright and very dark hues.  Red is more often cranked to the max, while blue is much more evenly distributed. Perhaps that is typical of the limited palette of cartoons or just a function of the small number of frames I chose.
+
+I chose the images to be representative of varying but typical scenes.  Let's label them and look at the histograms for each.
+```{r}
+rm_tidy <- left_join(rm_tidy,
+                     data_frame(
+                     img = c(1, 2, 3, 4, 5, 6),
+                     name = c("Schwifty","Portal","Cable",
+                     "Family", "Outdoor", "Otherworld")
+                     ))
+
+```
+
+![Cable](img/rm3.jpg)
+Cable
+![Family](img\rm4.jpg)
+Family
+![Otherworld](img\rm6.jpg)
+Otherworld
+![Outdoor](img\rm5.jpg)
+Outdoor
+![Portal](img\rm2.jpg)
+Portal
+![Schwifty](img\rm1.jpg)
+Schwifty
+
+
+```{r}
+
+ggplot(rm_tidy,aes(x=level,fill=color))+
+  geom_density(alpha=0.7) + 
+  scale_fill_manual(values=c("blue","green","red")) + 
+  facet_wrap(~name)+
+  theme_void()
+
+```
+
