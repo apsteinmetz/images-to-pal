@@ -1,16 +1,15 @@
 ---
-title: "image_to_pal"
+title: "Rick and Morty Palettes"
 output:
   md_document: default
   html_notebook: default
 ---
-#Rick and Morty Palettes
 
 This was just a fun morning exercise.  Let's mix multiple images to make a palette of their principal colors using k-means.  We'll also use the totally awesome list-columns concept to `map` each image's jpeg data into a data frame of lists that we can `map` our function that turns the jpeg data into a list of palette colors into a new data frame. 
 
-This just copies http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/ with the added twist of using multiple images before creating the palette.  I wanted to see if some cartoon show palettes using this method matched those in the ggsci package.  The ggsci palettes don't seem particularly attractive.  Did the authors use the algorithmic approach I will use here?  Will my approach look any better?  Don't know.  I decided to use "Rick and Morty" because my kids like it.  I would certainly never watch such drivel. I'm a scientist.
+This more-or-less copies http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/ with the added twist of using multiple images before creating the palette.  I wanted to see if some cartoon show palettes using this method matched those in the [`ggsci`](https://cran.r-project.org/web/packages/ggsci/vignettes/ggsci.html) package.  Did the authors use the algorithmic approach I will use here?  Will my approach look any better?  Don't know.  I decided to use "Rick and Morty" because my kids like it.  I would certainly never watch such drivel. I'm a scientist.
 
-For the record, the one pop culture derived palette I really like is the Wes Anderson palette available here: https://github.com/karthik/wesanderson and on CRAN.  These are presumably lovingly curated and created, not like the ones created by the stupid robots I use here.
+For the record, the one pop culture derived palette I really like is the [Wes Anderson palette]( available here: (https://github.com/karthik/wesanderson) and on CRAN.  These are presumably lovingly curated and created, not like the ones created by the stupid robots I use here.
 
 The drawback to using KNN to create palettes from images is that it's likely that *none* of the colors created are actually in the image.  They just represent the mathematical centers of the clusters of colors.
 
@@ -138,7 +137,7 @@ show_col(rgb(pal_schwifty))
 
 ```
 
-For plotting purposes I would like use these colors in order of intensity.
+For plotting purposes I would like use these colors in order of intensity. Sorting colors is a [topic in itself](http://www.alanzucconi.com/2015/09/30/colour-sorting/) but here we'll do it quick and simple.
 ```{r}
 pal_schwifty %>% 
   mutate(saturation=rowSums(.[1:3])) %>% 

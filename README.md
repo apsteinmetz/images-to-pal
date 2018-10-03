@@ -1,25 +1,23 @@
-Rick and Morty Palettes
-=======================
-
 This was just a fun morning exercise. Let's mix multiple images to make
 a palette of their principal colors using k-means. We'll also use the
 totally awesome list-columns concept to `map` each image's jpeg data
 into a data frame of lists that we can `map` our function that turns the
 jpeg data into a list of palette colors into a new data frame.
 
-This just copies
+This more-or-less copies
 <http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/>
 with the added twist of using multiple images before creating the
 palette. I wanted to see if some cartoon show palettes using this method
-matched those in the ggsci package. The ggsci palettes don't seem
-particularly attractive. Did the authors use the algorithmic approach I
-will use here? Will my approach look any better? Don't know. I decided
-to use "Rick and Morty" because my kids like it. I would certainly never
-watch such drivel. I'm a scientist.
+matched those in the
+[`ggsci`](https://cran.r-project.org/web/packages/ggsci/vignettes/ggsci.html)
+package. Did the authors use the algorithmic approach I will use here?
+Will my approach look any better? Don't know. I decided to use "Rick and
+Morty" because my kids like it. I would certainly never watch such
+drivel. I'm a scientist.
 
 For the record, the one pop culture derived palette I really like is the
-Wes Anderson palette available here:
-<https://github.com/karthik/wesanderson> and on CRAN. These are
+\[Wes Anderson palette\]( available here:
+(<https://github.com/karthik/wesanderson>) and on CRAN. These are
 presumably lovingly curated and created, not like the ones created by
 the stupid robots I use here.
 
@@ -93,7 +91,7 @@ For fun let's do some density plots of the color values.
       scale_fill_manual(values=c("blue","green","red")) + 
       theme_void()
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-3-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-3-1.png)
 
 We can see some evidence of bimodality, a preference for very bright and
 very dark hues. Red is more often cranked to the max, while blue is much
@@ -106,7 +104,7 @@ of cartoons or just a function of the small number of frames I chose.
       facet_wrap(~name)+
       theme_void()
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-4-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-4-1.png)
 
 It's interesting to compare "Cable" with "Family." Both images share the
 same backdrop but "Family" is much darker.
@@ -126,7 +124,7 @@ looks to me like it's between cornsilk4 and darkkhaki.
 
     show_col(c("cornsilk4",blend_color,"darkkhaki"))
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-5-1.png)
 
 Let's call it "desertkhaki" which, hopefully, is not a trigger word.
 
@@ -150,7 +148,7 @@ general terms but can run it in a snap.
 
     show_col(pal_schwifty)
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-6-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-6-1.png)
 
 For data plotting the separation between some of these colors is too
 small. I think 9 colors will suffice.
@@ -166,10 +164,12 @@ small. I think 9 colors will suffice.
 
     show_col(rgb(pal_schwifty))
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-7-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 
 For plotting purposes I would like use these colors in order of
-intensity.
+intensity. Sorting colors is a [topic in
+itself](http://www.alanzucconi.com/2015/09/30/colour-sorting/) but here
+we'll do it quick and simple.
 
     pal_schwifty %>% 
       mutate(saturation=rowSums(.[1:3])) %>% 
@@ -177,9 +177,9 @@ intensity.
       rgb() %>% 
       show_col()
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-8-1.png)
-That's about right. Let's put it all together. Go through all the images
-to create a series of palettes.
+![](README_files/figure-markdown_strict/unnamed-chunk-8-1.png) That's
+about right. Let's put it all together. Go through all the images to
+create a series of palettes.
 
     #function to turn a table of RGB values to an ordered list of colors
     gen_pal <- function(rgb_table) {
@@ -238,27 +238,27 @@ to create a series of palettes.
 
     show_pal("Cable",palette_rick)
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-13-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-13-1.png)
 
 ![Schwifty](img/rm1.jpg)
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-14-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
 ![Portal](img/rm2.jpg)
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-15-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-15-1.png)
 ![Family](img/rm4.jpg)
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-16-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-16-1.png)
 ![Outdoor](img/rm5.jpg)
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-17-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-17-1.png)
 ![Wedding](img/rm6.jpg)
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-18-1.png)
-Finally, let's do what we said we'd do at the beginning, put all these
-images together and add it to our list column of palettes.
+![](README_files/figure-markdown_strict/unnamed-chunk-18-1.png) Finally,
+let's do what we said we'd do at the beginning, put all these images
+together and add it to our list column of palettes.
 
     multi_img_pal <- gen_pal(rm_list)
     palette_rick<-data_frame(name="all",pal=list(multi_img_pal)) %>% bind_rows(palette_rick)
     show_col(multi_img_pal)
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-19-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 
 Not too bad. I'm glad something resembling Rick's hair makes it into the
 list. Compare it to the ggsci package Rick and Morty palette. Here we
@@ -268,7 +268,7 @@ selected. You can see Rick's hair and Morty's shirt color.
 
     show_col(ggsci::pal_rickandmorty()(9))
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-20-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-20-1.png)
 
 Make some plots.
 
@@ -285,10 +285,10 @@ Make some plots.
     ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2)+
       scale_color_manual(values = multi_img_pal) + theme_minimal()
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-21-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-21-1.png)
 
     ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2) +
       theme_minimal() +
       scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 
-![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-22-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png)
