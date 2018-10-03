@@ -4,8 +4,9 @@ output:
   md_document: default
   html_notebook: default
 ---
+#Rick and Morty Palettes
 
-This was just a fun morning exercise.  Let's mix multiple images to make a palette of their principal colors using k-means.
+This was just a fun morning exercise.  Let's mix multiple images to make a palette of their principal colors using k-means.  We'll also use the totally awesome list-columns concept to `map` each image's jpeg data into a data frame of lists that we can `map` our function that turns the jpeg data into a list of palette colors into a new data frame. 
 
 This just copies http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/ with the added twist of using multiple images before creating the palette.  I wanted to see if some cartoon show palettes using this method matched those in the ggsci package.  The ggsci palettes don't seem particularly attractive.  Did the authors use the algorithmic approach I will use here?  Will my approach look any better?  Don't know.  I decided to use "Rick and Morty" because my kids like it.  I would certainly never watch such drivel. I'm a scientist.
 
@@ -14,20 +15,19 @@ For the record, the one pop culture derived palette I really like is the Wes And
 The drawback to using KNN to create palettes from images is that it's likely that *none* of the colors created are actually in the image.  They just represent the mathematical centers of the clusters of colors.
 
 
-load libraries
-```{r warning=FALSE}
+Load libraries.
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(jpeg)
 library(scales)
 library(ggsci)
 ```
-Load mulitple images.  They are all Google image search thumbnails so the size is the same.  This matters since we are combining images a larger image would have a disproportional weight in our analysis.
+Load mulitple images.  They are all Google image search thumbnails so the size is the same.  This matters since we are combining images. A larger image would have a disproportional weight in our analysis.
 
 I first thought that, since I am combining multiple images to get one palette, I needed to tile the images then process.  No. We just care about the pixel color values so it really doesn't matter what position they are in.  The most efficient approach is to just chain all the RGB values together. Duh.  Still we want to do some work with the individual images so let's label them.
 ```{r}
 rm_list<-list()
 for (n in 1:6){
-  print(paste0("img/rm",n,".jpg"))
   img<-jpeg::readJPEG(paste0("img/rm",n,".jpg"))
   R<-as.vector(img[,,1])
   G<-as.vector(img[,,2])
@@ -62,14 +62,19 @@ I chose the images to be representative of varying but typical scenes.  Let's lo
 
 ![Cable](img/rm3.jpg)
 Cable
+
 ![Family](img\rm4.jpg)
 Family
+
 ![Wedding](img\rm6.jpg)
 Wedding
+
 ![Outdoor](img\rm5.jpg)
 Outdoor
+
 ![Portal](img\rm2.jpg)
 Portal
+
 ![Schwifty](img\rm1.jpg)
 Schwifty
 
@@ -88,7 +93,7 @@ It's interesting to compare "Cable" with "Family."  Both images share the same b
 
 #Make the palettes
 
-When I was a kid with watercolors I wanted to come up with a name for the filthy color that resulted when I mixed all the colors together.  I called it "Hitler"  (but, really, brown). What is the color that results when we average all the RGB values?  What named R colors resemble it?
+When I was a kid with watercolors I wanted to come up with a name for the filthy color that resulted when I mixed all the colors together.  I called it "Hitler"  (but, really, brown). What is the color that results when we average all the RGB values?  What named R colors resemble it? It looks to me like it's between cornsilk4 and darkkhaki.
 ```{r}
 blend_color<-rm_list %>% 
   summarise(R=mean(R),G=mean(G),B=mean(B)) %>% 
@@ -141,23 +146,21 @@ pal_schwifty %>%
 
 
 ```
-That's about right.  Now go through all the images to great a series of palettes.
+That's about right.  Let's put it all together. Go through all the images to create a series of palettes.
 
 ```{r}
 #function to turn a table of RGB values to an ordered list of colors
-gen_pal<- function(rgb_table){
-num_colors = 9
-pal <- rgb_table %>% 
-  select(R,G,B) %>% 
-  kmeans(centers = num_colors, iter.max = 30) %>% 
-  .$centers %>% 
-  as.tibble() %>% 
-  mutate(saturation=rowSums(.[1:3])) %>% 
-  arrange(saturation) %>% 
-  rgb() %>% 
-  {.}
-return(pal)
-
+gen_pal <- function(rgb_table) {
+  num_colors = 9
+  pal <- rgb_table %>%
+  select(R, G, B) %>%
+  kmeans(centers = num_colors, iter.max = 30) %>%
+  .$centers %>%
+  as.tibble() %>%
+  mutate(saturation = rowSums(.[1:3])) %>%
+  arrange(saturation) %>%
+  rgb()
+  return(pal)
 }
 ```
 
@@ -185,7 +188,7 @@ extract_pal<-function(palette_list,pal_name){
 
 ```{r include=FALSE}
 my_show_col<-function (colours, labels = TRUE, borders = NULL, cex_label = 0.6,label=NULL) 
-  #modify scales::show_col for our purposes
+  #modify scales::show_col to make the output more compact
 {
     n <- length(colours)
     #ncol <- ceiling(sqrt(n))

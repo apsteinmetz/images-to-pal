@@ -1,5 +1,11 @@
+Rick and Morty Palettes
+=======================
+
 This was just a fun morning exercise. Let's mix multiple images to make
-a palette of their principal colors using k-means.
+a palette of their principal colors using k-means. We'll also use the
+totally awesome list-columns concept to `map` each image's jpeg data
+into a data frame of lists that we can `map` our function that turns the
+jpeg data into a list of palette colors into a new data frame.
 
 This just copies
 <http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/>
@@ -21,39 +27,15 @@ The drawback to using KNN to create palettes from images is that it's
 likely that *none* of the colors created are actually in the image. They
 just represent the mathematical centers of the clusters of colors.
 
-load libraries
+Load libraries.
 
     library(tidyverse)
-
-    ## -- Attaching packages ----------------------------------------------------------- tidyverse 1.2.1 --
-
-    ## v ggplot2 3.0.0.9000     v purrr   0.2.5     
-    ## v tibble  1.4.2          v dplyr   0.7.6     
-    ## v tidyr   0.8.1          v stringr 1.3.1     
-    ## v readr   1.1.1          v forcats 0.3.0
-
-    ## -- Conflicts -------------------------------------------------------------- tidyverse_conflicts() --
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
     library(jpeg)
     library(scales)
-
-    ## 
-    ## Attaching package: 'scales'
-
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     discard
-
-    ## The following object is masked from 'package:readr':
-    ## 
-    ##     col_factor
-
     library(ggsci)
 
 Load mulitple images. They are all Google image search thumbnails so the
-size is the same. This matters since we are combining images a larger
+size is the same. This matters since we are combining images. A larger
 image would have a disproportional weight in our analysis.
 
 I first thought that, since I am combining multiple images to get one
@@ -65,7 +47,6 @@ images so let's label them.
 
     rm_list<-list()
     for (n in 1:6){
-      print(paste0("img/rm",n,".jpg"))
       img<-jpeg::readJPEG(paste0("img/rm",n,".jpg"))
       R<-as.vector(img[,,1])
       G<-as.vector(img[,,2])
@@ -74,15 +55,7 @@ images so let's label them.
         arrange(img)
     }
 
-    ## [1] "img/rm1.jpg"
-
     ## Warning: package 'bindrcpp' was built under R version 3.4.4
-
-    ## [1] "img/rm2.jpg"
-    ## [1] "img/rm3.jpg"
-    ## [1] "img/rm4.jpg"
-    ## [1] "img/rm5.jpg"
-    ## [1] "img/rm6.jpg"
 
     rm_list <- left_join(rm_list,
                          data_frame(
@@ -115,9 +88,17 @@ of cartoons or just a function of the small number of frames I chose.
 I chose the images to be representative of varying but typical scenes.
 Let's look at the histograms for each.
 
-![Cable](img/rm3.jpg) Cable ![Family](img\rm4.jpg) Family
-![Wedding](img\rm6.jpg) Wedding ![Outdoor](img\rm5.jpg) Outdoor
-![Portal](img\rm2.jpg) Portal ![Schwifty](img\rm1.jpg) Schwifty
+![Cable](img/rm3.jpg) Cable
+
+![Family](img\rm4.jpg) Family
+
+![Wedding](img\rm6.jpg) Wedding
+
+![Outdoor](img\rm5.jpg) Outdoor
+
+![Portal](img\rm2.jpg) Portal
+
+![Schwifty](img\rm1.jpg) Schwifty
 
     ggplot(rm_tidy,aes(x=level,fill=color))+
       geom_density(alpha=0.7) + 
@@ -136,7 +117,8 @@ Make the palettes
 When I was a kid with watercolors I wanted to come up with a name for
 the filthy color that resulted when I mixed all the colors together. I
 called it "Hitler" (but, really, brown). What is the color that results
-when we average all the RGB values? What named R colors resemble it?
+when we average all the RGB values? What named R colors resemble it? It
+looks to me like it's between cornsilk4 and darkkhaki.
 
     blend_color<-rm_list %>% 
       summarise(R=mean(R),G=mean(G),B=mean(B)) %>% 
@@ -196,23 +178,21 @@ intensity.
       show_col()
 
 ![](images_to_pal_files/figure-markdown_strict/unnamed-chunk-8-1.png)
-That's about right. Now go through all the images to great a series of
-palettes.
+That's about right. Let's put it all together. Go through all the images
+to create a series of palettes.
 
     #function to turn a table of RGB values to an ordered list of colors
-    gen_pal<- function(rgb_table){
-    num_colors = 9
-    pal <- rgb_table %>% 
-      select(R,G,B) %>% 
-      kmeans(centers = num_colors, iter.max = 30) %>% 
-      .$centers %>% 
-      as.tibble() %>% 
-      mutate(saturation=rowSums(.[1:3])) %>% 
-      arrange(saturation) %>% 
-      rgb() %>% 
-      {.}
-    return(pal)
-
+    gen_pal <- function(rgb_table) {
+      num_colors = 9
+      pal <- rgb_table %>%
+      select(R, G, B) %>%
+      kmeans(centers = num_colors, iter.max = 30) %>%
+      .$centers %>%
+      as.tibble() %>%
+      mutate(saturation = rowSums(.[1:3])) %>%
+      arrange(saturation) %>%
+      rgb()
+      return(pal)
     }
 
     #now make list columns, which are totally awesome, for each palette
