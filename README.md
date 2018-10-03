@@ -4,8 +4,8 @@ Rick and Morty Palettes
 This was just a fun morning exercise. Let's mix multiple images to make
 a palette of their principal colors using k-means. We'll also use the
 totally awesome list-columns concept to turn each image's jpeg data
-into a data frame of lists that we can `map` our function that turns the
-jpeg data into a list of palette colors into a new data frame.
+into a data frame of lists that we can `map` to a function that turns the
+jpeg data into a list of palette colors in a new data frame.
 
 This more-or-less copies
 <http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/>
