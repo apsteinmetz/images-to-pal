@@ -1,3 +1,6 @@
+Rick and Morty Palettes
+=======================
+
 This was just a fun morning exercise. Let's mix multiple images to make
 a palette of their principal colors using k-means. We'll also use the
 totally awesome list-columns concept to `map` each image's jpeg data
@@ -7,7 +10,8 @@ jpeg data into a list of palette colors into a new data frame.
 This more-or-less copies
 <http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/>
 with the added twist of using multiple images before creating the
-palette. I wanted to see if some cartoon show palettes using this method
+palette. We'll also get into the weeds a bit more with dissecting the
+images. I wanted to see if some cartoon show palettes using this method
 matched those in the
 [`ggsci`](https://cran.r-project.org/web/packages/ggsci/vignettes/ggsci.html)
 package. Did the authors use the algorithmic approach I will use here?
@@ -28,9 +32,10 @@ just represent the mathematical centers of the clusters of colors.
 Load libraries.
 
     library(tidyverse)
-    library(jpeg)
-    library(scales)
-    library(ggsci)
+    library(jpeg) #import images
+    library(scales) #just for for the show_col() function
+    library(ggsci) #to compare my palettes to its palettes
+    library(ggfortify) #to support kmeans plots
 
 Load mulitple images. They are all Google image search thumbnails so the
 size is the same. This matters since we are combining images. A larger
@@ -291,4 +296,39 @@ Make some plots.
       theme_minimal() +
       scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 
-![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png) \#One
+more thing... Back to the k-means analysis. When we created these
+palettes we were really assigning colors to the centers of the clusters
+of near neigbors in the a 2D space. Let's visualize those clusters. The
+`ggplot::autoplot()` function makes this trivally easy. Now let's crank
+up the number of colors to 20.
+
+    num_colors = 20
+    pixels<-rm_list %>% select(R, G, B)
+    km <-  pixels %>% 
+      kmeans(centers = num_colors, iter.max = 30)
+    autoplot(km,data=pixels)+
+      scale_color_manual(values=rgb(km$centers),guide=FALSE)+theme_void()
+
+![](README_files/figure-markdown_strict/unnamed-chunk-23-1.png) This is
+every pixel colored by it's cluster assignment and plotted. This is a
+form of principal components analysis (PCA). It's clear that the
+x-dimension, which happens to explain 74% of the color variance is
+luminosity, with darker shades on the right. The other dimension is not
+clear.
+
+We can make it clear by plotting the second and third principal
+component on a factor chart.
+
+    #add PCA cluster assignment to rm_list
+    num_colors<-8
+    km <-  pixels %>% 
+      kmeans(centers = num_colors, iter.max = 30)
+
+    rm_list <- rm_list %>% 
+      select(img,R,G,B,name) %>% 
+      bind_cols(data_frame(cluster=factor(km$cluster)))
+
+    library(FactoMineR)
+
+    ## Warning: package 'FactoMineR' was built under R version 3.4.4
