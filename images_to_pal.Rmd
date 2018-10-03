@@ -19,6 +19,7 @@ load libraries
 library(tidyverse)
 library(jpeg)
 library(scales)
+library(ggsci)
 ```
 Load mulitple images.  They are all Google image search thumbnails so the size is the same.  This matters since we are combining images a larger image would have a disproportional weight in our analysis.
 
@@ -39,7 +40,7 @@ rm_list <- left_join(rm_list,
                      data_frame(
                      img = c(1, 2, 3, 4, 5, 6),
                      name = c("Schwifty","Portal","Cable",
-                     "Family", "Outdoor", "Otherworld")
+                     "Family", "Outdoor", "Wedding")
                      ))
 
 ```
@@ -63,8 +64,8 @@ I chose the images to be representative of varying but typical scenes.  Let's lo
 Cable
 ![Family](img\rm4.jpg)
 Family
-![Otherworld](img\rm6.jpg)
-Otherworld
+![Wedding](img\rm6.jpg)
+Wedding
 ![Outdoor](img\rm5.jpg)
 Outdoor
 ![Portal](img\rm2.jpg)
@@ -162,12 +163,24 @@ return(pal)
 
 ```{r}
 #now make list columns, which are totally awesome, for each palette
-palette_list<-rm_list %>% 
+palette_rick<-rm_list %>% 
   group_by(name) %>% 
   select(-img) %>% 
   nest(.key="rgb") %>% 
   transmute(name=name,pal= map(rgb,gen_pal))
-palette_list
+palette_rick
+
+#a function to extract the individual palettes, given a name.
+
+extract_pal<-function(palette_list,pal_name){
+  pal<-palette_list %>% filter(name==pal_name) %>% 
+    select(pal) %>% 
+    unlist() %>% 
+    as.vector()
+  return(pal)
+}
+
+
 ```
 
 ```{r include=FALSE}
@@ -200,54 +213,63 @@ my_show_col<-function (colours, labels = TRUE, borders = NULL, cex_label = 0.6,l
 
 
 ```{r}
-show_pal<- function(img_name,palette_list){
+show_pal<- function(img_name,palette_rick){
   
-palette_list %>% 
+palette_rick %>% 
     filter(name==img_name) %>% 
     select(pal) %>% 
     unlist() %>% 
     my_show_col(label = img_name,labels = F)  
 # BTW, If you hate verbose pipes, here is the non-dplyr way of getting the same thing.
-#by_name[by_name$name=="Otherworld",]$pal[[1]] %>% show_col()
+#by_name[by_name$name=="Wedding",]$pal[[1]] %>% show_col()
 }
 ```
 ![Cable](img/rm3.jpg)
 ```{r}
-show_pal("Cable",palette_list)
+show_pal("Cable",palette_rick)
 ```
 
 ![Schwifty](img/rm1.jpg)
 ```{r echo=FALSE}
-show_pal("Schwifty",palette_list)
+show_pal("Schwifty",palette_rick)
 ```
 
 ![Portal](img/rm2.jpg)
 ```{r echo=FALSE}
-show_pal("Portal",palette_list)
+show_pal("Portal",palette_rick)
 ```
 ![Family](img/rm4.jpg)
 ```{r echo=FALSE}
-show_pal("Family",palette_list)
+show_pal("Family",palette_rick)
 ```
 ![Outdoor](img/rm5.jpg)
 ```{r echo=FALSE}
-show_pal("Outdoor",palette_list)
+show_pal("Outdoor",palette_rick)
 ```
-![Otherworld](img/rm6.jpg)
+![Wedding](img/rm6.jpg)
 ```{r echo=FALSE}
-show_pal("Otherworld",palette_list)
+show_pal("Wedding",palette_rick)
 ```
-Finally, let's do what we said we'd do at the beginning, put all these images together.
+Finally, let's do what we said we'd do at the beginning, put all these images together and add it to our list column of palettes.
 ```{r}
 multi_img_pal <- gen_pal(rm_list)
+palette_rick<-data_frame(name="all",pal=list(multi_img_pal)) %>% bind_rows(palette_rick)
 show_col(multi_img_pal)
 ```
 
-Not too bad.  I'm glad something resembling Rick's hair makes it into the list.  Make some plots.
+Not too bad.  I'm glad something resembling Rick's hair makes it into the list.  Compare it to the ggsci package Rick and Morty palette.  Here we see the weaknesses of an algorithmic approach.  ggsci is more interesting since it has more color diversity and vividness.  I assume they were hand selected.  You can see Rick's hair and Morty's shirt color.  
+```{r}
+show_col(ggsci::pal_rickandmorty()(9))
+```
+
+
+Make some plots.
 
 ```{r}
+#use the example in help for dplyr::gather
 stocks <- data.frame(
   time = as.Date('2009-01-01') + 0:9,
+  W = rnorm(10, 0, 1),
   X = rnorm(10, 0, 1),
   Y = rnorm(10, 0, 2),
   Z = rnorm(10, 0, 4)
@@ -261,13 +283,7 @@ ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2)+
 
 ```{r}
 
-extract_pal<-function(palette_list,pal_name,n=8){
-  pal<-palette_list %>% filter(name==pal_name) %>% 
-    select(pal) %>% 
-    unlist() %>% .[1:n]
-  return(pal)
-}
-
-ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2)+
-  scale_color_manual(values = extract_pal(palette_list,"Outdoor",3)) + theme_minimal()
+ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2) +
+  theme_minimal() +
+  scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 ```
