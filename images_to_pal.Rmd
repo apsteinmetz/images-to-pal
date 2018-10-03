@@ -1,8 +1,8 @@
 ---
 title: "image_to_pal"
-output: 
-  html_notebook:
-  fig_caption: TRUE
+output:
+  md_document: default
+  html_notebook: default
 ---
 
 This was just a fun morning exercise.  Let's mix multiple images to make a palette of their principal colors using k-means.
