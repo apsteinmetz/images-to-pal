@@ -69,6 +69,21 @@ images so let's label them.
 Show Me What You Got
 ====================
 
+I chose the images to be representative of varying but typical scenes.
+Let's look at the histograms for each.
+
+![Cable](img/rm3.jpg) Cable
+
+![Family](img/rm4.jpg) Family
+
+![Wedding](img/rm6.jpg) Wedding
+
+![Outdoor](img/rm5.jpg) Outdoor
+
+![Portal](img/rm2.jpg) Portal
+
+![Schwifty](img/rm1.jpg) Schwifty
+
 For fun let's do some density plots of the color values.
 
     #make data tidy first
@@ -84,21 +99,6 @@ We can see some evidence of bimodality, a preference for very bright and
 very dark hues. Red is more often cranked to the max, while blue is much
 more evenly distributed. Perhaps that is typical of the limited palette
 of cartoons or just a function of the small number of frames I chose.
-
-I chose the images to be representative of varying but typical scenes.
-Let's look at the histograms for each.
-
-![Cable](img/rm3.jpg) Cable
-
-![Family](img\rm4.jpg) Family
-
-![Wedding](img\rm6.jpg) Wedding
-
-![Outdoor](img\rm5.jpg) Outdoor
-
-![Portal](img\rm2.jpg) Portal
-
-![Schwifty](img\rm1.jpg) Schwifty
 
     ggplot(rm_tidy,aes(x=level,fill=color))+
       geom_density(alpha=0.7) + 
