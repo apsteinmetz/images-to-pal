@@ -295,32 +295,38 @@ Make some plots.
 ![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png) \# One
 more thing... Back to the k-means analysis. When we created these
 palettes we were really assigning colors to the centers of the clusters
-of near neigbors in the a 2D space. Let's visualize those clusters. The
-`ggplot::autoplot()` function makes this trivally easy. Now let's crank
-up the number of colors to 20.
+of near neigbors in the a 2D space. This is a form of principal
+components analysis (PCA). Let's visualize those clusters. The
+`ggplot::autoplot()` function makes this trivally easy. While we are at
+it, let's crank up the number of colors to 20.
 
     num_colors = 20
-    pixels<-rm_list %>% select(R, G, B)
-    km <-  pixels %>% 
-      kmeans(centers = num_colors, iter.max = 30)
-    autoplot(km,data=pixels)+
-      scale_color_manual(values=rgb(km$centers),guide=FALSE)+theme_void()
+    #assign each pixel to a cluster
+    km <-  rm_list[c("R","G","B")] %>% kmeans(centers = num_colors, iter.max = 30)
+
+    rm_list <- rm_list %>% mutate(cluster=as.factor(km$cluster))
+    autoplot(prcomp(rm_list[c("R","G","B")]), x=1,y=2,data = rm_list, colour = "cluster",
+             loadings = TRUE, loadings.colour = 'blue',
+             loadings.label = TRUE, loadings.label.size = 10) +
+      scale_color_manual(values=rgb(km$centers),guide=FALSE)+
+      theme_classic()
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-23-1.png) This is
-every pixel colored by it's cluster assignment and plotted. This is a
-form of principal components analysis (PCA). It's clear that the
-x-dimension, which happens to explain 74% of the color variance is
-luminosity, with darker shades on the right. The other dimension is not
-clear.
+every pixel colored by it's cluster assignment and plotted. It's clear
+that the x-dimension, which happens to explain 74% of the color variance
+is luminosity, with darker shades on the right. The other dimension
+seems to be related to hue.
 
 We can make it clear by plotting the second and third principal
-component on a factor chart.
+component.
 
-    #add PCA cluster assignment to rm_list
-    num_colors<-8
-    km <-  pixels %>% 
-      kmeans(centers = num_colors, iter.max = 30)
+    rm_list <- rm_list %>% mutate(cluster=as.factor(km$cluster))
+    autoplot(prcomp(rm_list[c("R","G","B")]), x=2,y=3,data = rm_list, colour = "cluster",
+             loadings = TRUE, loadings.colour = 'blue',
+             loadings.label = TRUE, loadings.label.size = 10) +
+      scale_color_manual(values=rgb(km$centers),guide=FALSE)+
+      theme_classic()
 
-    rm_list <- rm_list %>% 
-      select(img,R,G,B,name) %>% 
-      bind_cols(data_frame(cluster=factor(km$cluster)))
+![](README_files/figure-markdown_strict/unnamed-chunk-24-1.png) Now it's
+quite clear that the second and third principal components map to the
+color space.

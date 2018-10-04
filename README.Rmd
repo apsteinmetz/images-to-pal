@@ -300,6 +300,8 @@ Back to the k-means analysis.  When we created these palettes we were really ass
 ```{r}
 num_colors = 20
 #assign each pixel to a cluster
+km <-  rm_list[c("R","G","B")] %>% kmeans(centers = num_colors, iter.max = 30)
+
 rm_list <- rm_list %>% mutate(cluster=as.factor(km$cluster))
 autoplot(prcomp(rm_list[c("R","G","B")]), x=1,y=2,data = rm_list, colour = "cluster",
          loadings = TRUE, loadings.colour = 'blue',
