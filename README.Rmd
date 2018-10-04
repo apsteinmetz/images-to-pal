@@ -94,7 +94,7 @@ ggplot(rm_tidy,aes(x=level,fill=color))+
 
 It's interesting to compare "Cable" with "Family."  Both images share the same backdrop but "Family" is much darker.
 
-#Make the Palettes
+# Make the Palettes
 
 When I was a kid with watercolors I wanted to come up with a name for the filthy color that resulted when I mixed all the colors together.  I called it "Hitler"  (but, really, brown). What is the color that results when we average all the RGB values?  What named R colors resemble it? It looks to me like it's between cornsilk4 and darkkhaki.
 ```{r}
@@ -149,6 +149,7 @@ pal_schwifty %>%
 
 
 ```
+
 That's about right.  Let's put it all together. Go through all the images to create a series of palettes.
 
 ```{r}
@@ -293,7 +294,7 @@ ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2) +
   theme_minimal() +
   scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 ```
-#One more thing...
+# One more thing...
 Back to the k-means analysis.  When we created these palettes we were really assigning colors to the centers of the clusters of near neigbors in the a 2D space.  Let's visualize those clusters. The `ggplot::autoplot()` function makes this trivally easy. Now let's crank up the number of colors to 20.
 
 ```{r}

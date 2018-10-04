@@ -109,7 +109,8 @@ of cartoons or just a function of the small number of frames I chose.
 It’s interesting to compare “Cable” with “Family.” Both images share the
 same backdrop but “Family” is much darker.
 
-\#Make the Palettes
+Make the Palettes
+=================
 
 When I was a kid with watercolors I wanted to come up with a name for
 the filthy color that resulted when I mixed all the colors together. I
@@ -176,9 +177,10 @@ we’ll do it quick and simple.
       rgb() %>% 
       show_col()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-8-1.png) That’s
-about right. Let’s put it all together. Go through all the images to
-create a series of palettes.
+![](README_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+
+That’s about right. Let’s put it all together. Go through all the images
+to create a series of palettes.
 
     #function to turn a table of RGB values to an ordered list of colors
     gen_pal <- function(rgb_table) {
@@ -290,7 +292,7 @@ Make some plots.
       theme_minimal() +
       scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 
-![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png) \#One
+![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png) \# One
 more thing… Back to the k-means analysis. When we created these palettes
 we were really assigning colors to the centers of the clusters of near
 neigbors in the a 2D space. Let’s visualize those clusters. The
