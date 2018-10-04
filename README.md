@@ -114,9 +114,10 @@ Make the Palettes
 
 When I was a kid with watercolors I wanted to come up with a name for
 the filthy color that resulted when I mixed all the colors together. I
-called it "Hitler" (but, really, brown). What is the color that results
-when we average all the RGB values? What named R colors resemble it? It
-looks to me like it's between cornsilk4 and darkkhaki.
+called it (trigger warning) "Hitler" (but, really, brown). What is the
+color that results when we average all the RGB values? What named R
+colors resemble it? It looks to me like it's between "cornsilk4"" and
+"darkkhaki.""
 
     blend_color<-rm_list %>% 
       summarise(R=mean(R),G=mean(G),B=mean(B)) %>% 
@@ -134,7 +135,7 @@ chose for their distinctiveness.
 
 For me, the good thing about open source is that I can stand on the
 shoulders of giants in the community. R also makes very muscular
-analysis trivally simple. On the other hand it makes "script kiddies"
+analysis trivally simple. On the other hand, it makes "script kiddies"
 like me potentially dangerous. I can only describe k-means in the most
 general terms but can run it in a snap.
 
@@ -271,7 +272,8 @@ selected. You can see Rick's hair and Morty's shirt color.
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-20-1.png)
 
-Make some plots.
+Since the (rather flimsy) point of this excercise is to make palettes
+for data graphics, let's make some plots.
 
     #use the example in help for dplyr::gather
     stocks <- data.frame(
@@ -292,13 +294,21 @@ Make some plots.
       theme_minimal() +
       scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 
-![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png) \# One
-more thing... Back to the k-means analysis. When we created these
-palettes we were really assigning colors to the centers of the clusters
-of near neigbors in the a 2D space. This is a form of principal
-components analysis (PCA). Let's visualize those clusters. The
-`ggplot::autoplot()` function makes this trivally easy. While we are at
-it, let's crank up the number of colors to 20.
+![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png)
+Arguably, the perceptual differnces among the colors are less than
+ideal, even if the colors are pleasing. We might take the additional
+step of hand-selecting colors from a larger generated palette that are
+more suitable for plots.
+
+One more thing...
+=================
+
+Back to the k-means analysis. When we created these palettes we were
+really assigning colors to the centers of the clusters of near neigbors
+in the a 2D space. This is a form of principal components analysis
+(PCA). Let's visualize those clusters. The `ggplot::autoplot()` function
+makes this trivally easy. While we are at it, let's crank up the number
+of colors to 20.
 
     num_colors = 20
     #assign each pixel to a cluster
@@ -313,9 +323,9 @@ it, let's crank up the number of colors to 20.
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-23-1.png) This is
 every pixel colored by it's cluster assignment and plotted. It's clear
-that the x-dimension, which happens to explain 74% of the color variance
-is luminosity, with darker shades on the right. The other dimension
-seems to be related to hue.
+that the x-dimension, which happens to explain 74% of the color
+variance, is luminosity, with darker shades on the right. The other
+dimension seems to be related to hue.
 
 We can make it clear by plotting the second and third principal
 component.
@@ -327,6 +337,8 @@ component.
       scale_color_manual(values=rgb(km$centers),guide=FALSE)+
       theme_classic()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-24-1.png) Now it's
-quite clear that the second and third principal components map to the
-color space.
+![](README_files/figure-markdown_strict/unnamed-chunk-24-1.png)
+
+Now it's quite clear that the second and third principal components map
+to the color space even though this explains only about 25% of the
+variation in the data.
