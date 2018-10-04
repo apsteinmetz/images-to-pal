@@ -1,33 +1,32 @@
 Rick and Morty Palettes
 =======================
 
-This was just a fun morning exercise. Let's mix multiple images to make
-a palette of their principal colors using k-means. We'll also use the
-totally awesome list-columns concept to turn each image's jpeg data
-into a data frame of lists that we can `map` to a function that turns the
+This was just a fun morning exercise. Let’s mix multiple images to make
+a palette of their principal colors using k-means. We’ll also use the
+totally awesome list-columns concept to put each image’s jpeg data into
+a data frame of lists that we can `map` to a function that turns the
 jpeg data into a list of palette colors in a new data frame.
 
 This more-or-less copies
 <http://www.milanor.net/blog/build-color-palette-from-image-with-paletter/>
 with the added twist of using multiple images before creating the
-palette. We'll also get into the weeds a bit more with dissecting the
+palette. We’ll also get into the weeds a bit more with dissecting the
 images. I wanted to see if some cartoon show palettes using this method
 matched those in the
 [`ggsci`](https://cran.r-project.org/web/packages/ggsci/vignettes/ggsci.html)
 package. Did the authors use the algorithmic approach I will use here?
-Will my approach look any better? Don't know. I decided to use "Rick and
-Morty" because my kids like it. I would certainly never watch such
-drivel. I'm a scientist.
+Will my approach look any better? Don’t know. I decided to use “Rick and
+Morty” because my kids like it. I would certainly never watch such
+drivel. I’m a scientist.
 
 For the record, the one pop culture derived palette I really like is the
-\[Wes Anderson palette\]( available here:
-(<https://github.com/karthik/wesanderson>) and on CRAN. These are
-presumably lovingly curated and created, not like the ones created by
-the stupid robots I use here.
+[Wes Anderson palette](https://github.com/karthik/wesanderson) and on
+CRAN. These are presumably lovingly curated and created, not like the
+ones created by the stupid robot I use here.
 
-The drawback to using KNN to create palettes from images is that it's
-likely that *none* of the colors created are actually in the image. They
-just represent the mathematical centers of the clusters of colors.
+The drawback to using K-means to create palettes from images is that
+it’s likely that *none* of the colors created are actually in the image.
+They just represent the mathematical centers of the clusters of colors.
 
 Load libraries.
 
@@ -42,11 +41,11 @@ size is the same. This matters since we are combining images. A larger
 image would have a disproportional weight in our analysis.
 
 I first thought that, since I am combining multiple images to get one
-palette, I needed to tile the images then process. No. We just care
-about the pixel color values so it really doesn't matter what position
+palette, I needed to tile the images then process. No. We just care
+about the pixel color values so it really doesn’t matter what position
 they are in. The most efficient approach is to just chain all the RGB
 values together. Duh. Still we want to do some work with the individual
-images so let's label them.
+images so let’s label them.
 
     rm_list<-list()
     for (n in 1:6){
@@ -58,8 +57,6 @@ images so let's label them.
         arrange(img)
     }
 
-    ## Warning: package 'bindrcpp' was built under R version 3.4.4
-
     rm_list <- left_join(rm_list,
                          data_frame(
                          img = c(1, 2, 3, 4, 5, 6),
@@ -67,13 +64,11 @@ images so let's label them.
                          "Family", "Outdoor", "Wedding")
                          ))
 
-    ## Joining, by = "img"
-
 Show Me What You Got
 ====================
 
-I chose the images to be representative of varying but typical scenes.
-Let's look at the histograms for each.
+I chose the images from Google image search to be representative of
+varying but typical scenes.
 
 ![Cable](img/rm3.jpg) Cable
 
@@ -87,7 +82,7 @@ Let's look at the histograms for each.
 
 ![Schwifty](img/rm1.jpg) Schwifty
 
-For fun let's do some density plots of the color values.
+For fun let’s do some density plots of the color values.
 
     #make data tidy first
     rm_tidy <- rm_list %>% gather("color","level",-img,-name)
@@ -111,17 +106,16 @@ of cartoons or just a function of the small number of frames I chose.
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-4-1.png)
 
-It's interesting to compare "Cable" with "Family." Both images share the
-same backdrop but "Family" is much darker.
+It’s interesting to compare “Cable” with “Family.” Both images share the
+same backdrop but “Family” is much darker.
 
-Make the palettes
-=================
+\#Make the Palettes
 
 When I was a kid with watercolors I wanted to come up with a name for
 the filthy color that resulted when I mixed all the colors together. I
-called it "Hitler" (but, really, brown). What is the color that results
+called it “Hitler” (but, really, brown). What is the color that results
 when we average all the RGB values? What named R colors resemble it? It
-looks to me like it's between cornsilk4 and darkkhaki.
+looks to me like it’s between cornsilk4 and darkkhaki.
 
     blend_color<-rm_list %>% 
       summarise(R=mean(R),G=mean(G),B=mean(B)) %>% 
@@ -131,15 +125,15 @@ looks to me like it's between cornsilk4 and darkkhaki.
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-5-1.png)
 
-Let's call it "desertkhaki" which, hopefully, is not a trigger word.
+Let’s call it “desertkhaki” which, hopefully, is not a trigger word.
 
-Now, for the fun part. In the Wes Anderson palette set, each movie get's
-a different palette. Let's make palettes for each of the images, which I
+Now, for the fun part. In the Wes Anderson palette set, each movie get’s
+a different palette. Let’s make palettes for each of the images, which I
 chose for their distinctiveness.
 
 For me, the good thing about open source is that I can stand on the
 shoulders of giants in the community. R also makes very muscular
-analysis trivally simple. On the other hand it makes "script kiddies"
+analysis trivally simple. On the other hand it makes “script kiddies”
 like me potentially dangerous. I can only describe k-means in the most
 general terms but can run it in a snap.
 
@@ -174,7 +168,7 @@ small. I think 9 colors will suffice.
 For plotting purposes I would like use these colors in order of
 intensity. Sorting colors is a [topic in
 itself](http://www.alanzucconi.com/2015/09/30/colour-sorting/) but here
-we'll do it quick and simple.
+we’ll do it quick and simple.
 
     pal_schwifty %>% 
       mutate(saturation=rowSums(.[1:3])) %>% 
@@ -182,8 +176,8 @@ we'll do it quick and simple.
       rgb() %>% 
       show_col()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-8-1.png) That's
-about right. Let's put it all together. Go through all the images to
+![](README_files/figure-markdown_strict/unnamed-chunk-8-1.png) That’s
+about right. Let’s put it all together. Go through all the images to
 create a series of palettes.
 
     #function to turn a table of RGB values to an ordered list of colors
@@ -256,7 +250,7 @@ create a series of palettes.
 ![](README_files/figure-markdown_strict/unnamed-chunk-17-1.png)
 ![Wedding](img/rm6.jpg)
 ![](README_files/figure-markdown_strict/unnamed-chunk-18-1.png) Finally,
-let's do what we said we'd do at the beginning, put all these images
+let’s do what we said we’d do at the beginning, put all these images
 together and add it to our list column of palettes.
 
     multi_img_pal <- gen_pal(rm_list)
@@ -265,11 +259,11 @@ together and add it to our list column of palettes.
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 
-Not too bad. I'm glad something resembling Rick's hair makes it into the
+Not too bad. I’m glad something resembling Rick’s hair makes it into the
 list. Compare it to the ggsci package Rick and Morty palette. Here we
 see the weaknesses of an algorithmic approach. ggsci is more interesting
 since it has more color diversity and vividness. I assume they were hand
-selected. You can see Rick's hair and Morty's shirt color.
+selected. You can see Rick’s hair and Morty’s shirt color.
 
     show_col(ggsci::pal_rickandmorty()(9))
 
@@ -297,10 +291,10 @@ Make some plots.
       scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png) \#One
-more thing... Back to the k-means analysis. When we created these
-palettes we were really assigning colors to the centers of the clusters
-of near neigbors in the a 2D space. Let's visualize those clusters. The
-`ggplot::autoplot()` function makes this trivally easy. Now let's crank
+more thing… Back to the k-means analysis. When we created these palettes
+we were really assigning colors to the centers of the clusters of near
+neigbors in the a 2D space. Let’s visualize those clusters. The
+`ggplot::autoplot()` function makes this trivally easy. Now let’s crank
 up the number of colors to 20.
 
     num_colors = 20
@@ -311,8 +305,8 @@ up the number of colors to 20.
       scale_color_manual(values=rgb(km$centers),guide=FALSE)+theme_void()
 
 ![](README_files/figure-markdown_strict/unnamed-chunk-23-1.png) This is
-every pixel colored by it's cluster assignment and plotted. This is a
-form of principal components analysis (PCA). It's clear that the
+every pixel colored by it’s cluster assignment and plotted. This is a
+form of principal components analysis (PCA). It’s clear that the
 x-dimension, which happens to explain 74% of the color variance is
 luminosity, with darker shades on the right. The other dimension is not
 clear.
@@ -328,7 +322,3 @@ component on a factor chart.
     rm_list <- rm_list %>% 
       select(img,R,G,B,name) %>% 
       bind_cols(data_frame(cluster=factor(km$cluster)))
-
-    library(FactoMineR)
-
-    ## Warning: package 'FactoMineR' was built under R version 3.4.4
