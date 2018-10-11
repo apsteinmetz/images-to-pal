@@ -35,6 +35,7 @@ Load libraries.
     library(scales) #just for for the show_col() function
     library(ggsci) #to compare my palettes to its palettes
     library(ggfortify) #to support kmeans plots
+    library(gridExtra) #multiple plots on a page
 
 Load mulitple images. They are all Google image search thumbnails so the
 size is the same. This matters since we are combining images. A larger
@@ -225,42 +226,28 @@ to create a series of palettes.
       return(pal)
     }
 
-    show_pal<- function(img_name,palette_rick){
+    plot_one<-function(pal_name){
+      tmp <- palette_rick %>% unnest() %>% filter(name==pal_name)
+      g<- ggplot(tmp,aes(pal,fill=pal)) + geom_bar() + 
+      scale_fill_manual(values=tmp$pal,guide=F) +
+      theme_void()+ggtitle(pal_name)
+      return (g)
       
-    palette_rick %>% 
-        filter(name==img_name) %>% 
-        select(pal) %>% 
-        unlist() %>% 
-        my_show_col(label = img_name,labels = F)  
-    # BTW, If you hate verbose pipes, here is the non-dplyr way of getting the same thing.
-    #by_name[by_name$name=="Wedding",]$pal[[1]] %>% show_col()
     }
 
-![Cable](img/rm3.jpg)
+    lapply(palette_rick$name,plot_one) %>% 
+      grid.arrange(grobs=.)
 
-    show_pal("Cable",palette_rick)
+![](README_files/figure-markdown_strict/unnamed-chunk-11-1.png)
 
-![](README_files/figure-markdown_strict/unnamed-chunk-13-1.png)
-
-![Schwifty](img/rm1.jpg)
-![](README_files/figure-markdown_strict/unnamed-chunk-14-1.png)
-
-![Portal](img/rm2.jpg)
-![](README_files/figure-markdown_strict/unnamed-chunk-15-1.png)
-![Family](img/rm4.jpg)
-![](README_files/figure-markdown_strict/unnamed-chunk-16-1.png)
-![Outdoor](img/rm5.jpg)
-![](README_files/figure-markdown_strict/unnamed-chunk-17-1.png)
-![Wedding](img/rm6.jpg)
-![](README_files/figure-markdown_strict/unnamed-chunk-18-1.png) Finally,
-let's do what we said we'd do at the beginning, put all these images
-together and add it to our list column of palettes.
+Finally, let's do what we said we'd do at the beginning, put all these
+images together and add it to our list column of palettes.
 
     multi_img_pal <- gen_pal(rm_list)
     palette_rick<-data_frame(name="all",pal=list(multi_img_pal)) %>% bind_rows(palette_rick)
     show_col(multi_img_pal)
 
-![](README_files/figure-markdown_strict/unnamed-chunk-19-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-12-1.png)
 
 Not too bad. I'm glad something resembling Rick's hair makes it into the
 list. Compare it to the ggsci package Rick and Morty palette. Here we
@@ -270,7 +257,7 @@ selected. You can see Rick's hair and Morty's shirt color.
 
     show_col(ggsci::pal_rickandmorty()(9))
 
-![](README_files/figure-markdown_strict/unnamed-chunk-20-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-13-1.png)
 
 Since the (rather flimsy) point of this excercise is to make palettes
 for data graphics, let's make some plots.
@@ -288,13 +275,13 @@ for data graphics, let's make some plots.
     ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2)+
       scale_color_manual(values = multi_img_pal) + theme_minimal()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-21-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-14-1.png)
 
     ggplot(stocksm,aes(time,price,color=stock))+geom_line(size=2) +
       theme_minimal() +
       scale_color_manual(values = extract_pal(palette_rick,"Wedding"))
 
-![](README_files/figure-markdown_strict/unnamed-chunk-22-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-15-1.png)
 Arguably, the perceptual differnces among the colors are less than
 ideal, even if the colors are pleasing. We might take the additional
 step of hand-selecting colors from a larger generated palette that are
@@ -321,7 +308,7 @@ of colors to 20.
       scale_color_manual(values=rgb(km$centers),guide=FALSE)+
       theme_classic()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-23-1.png) This is
+![](README_files/figure-markdown_strict/unnamed-chunk-16-1.png) This is
 every pixel colored by it's cluster assignment and plotted. It's clear
 that the x-dimension, which happens to explain 74% of the color
 variance, is luminosity, with darker shades on the right. The other
@@ -334,11 +321,13 @@ component.
     autoplot(prcomp(rm_list[c("R","G","B")]), x=2,y=3,data = rm_list, colour = "cluster",
              loadings = TRUE, loadings.colour = 'blue',
              loadings.label = TRUE, loadings.label.size = 10) +
-      scale_color_manual(values=rgb(km$centers),guide=FALSE)+
+      scale_color_manual(values=rgb(km$centers),guide=F)+
       theme_classic()
 
-![](README_files/figure-markdown_strict/unnamed-chunk-24-1.png)
+![](README_files/figure-markdown_strict/unnamed-chunk-17-1.png)
 
 Now it's quite clear that the second and third principal components map
 to the color space even though this explains only about 25% of the
 variation in the data.
+
+\`\`\`

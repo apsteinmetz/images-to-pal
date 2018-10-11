@@ -22,6 +22,7 @@ library(jpeg) #import images
 library(scales) #just for for the show_col() function
 library(ggsci) #to compare my palettes to its palettes
 library(ggfortify) #to support kmeans plots
+library(gridExtra) #multiple plots on a page
 ```
 Load mulitple images.  They are all Google image search thumbnails so the size is the same.  This matters since we are combining images. A larger image would have a disproportional weight in our analysis.
 
@@ -190,73 +191,22 @@ extract_pal<-function(palette_list,pal_name){
 
 ```
 
-```{r include=FALSE}
-my_show_col<-function (colours, labels = TRUE, borders = NULL, cex_label = 0.6,label=NULL) 
-  #modify scales::show_col to make the output more compact
-{
-    n <- length(colours)
-    #ncol <- ceiling(sqrt(n))
-    #nrow <- ceiling(n/ncol)
-    ncol=n
-    nrow=1
-    colours <- c(colours, rep(NA, nrow * ncol - length(colours)))
-    colours <- matrix(colours, ncol = ncol, byrow = TRUE)
-    old <- par(pty = "s", mar = c(0, 0, 0, 0))
-    on.exit(par(old))
-    size <- max(dim(colours))
-    plot(c(0, size), c(0, 2), type = "n", xlab = "", ylab = "", 
-        axes = FALSE,asp=1/2)
-    
-    #xleft,ybottom,xright,ytop
-    rect(col(colours)-1, 0, col(colours), 3, 
-        col = colours, border = borders)
-    title(main=label,line=-8)
-    if (labels) {
-        text(col(colours) - 0.5, -row(colours) + 0.5, colours, 
-            cex = cex_label)
-    }
-}
-```
-
 
 ```{r}
-show_pal<- function(img_name,palette_rick){
+plot_one<-function(pal_name){
+  tmp <- palette_rick %>% unnest() %>% filter(name==pal_name)
+  g<- ggplot(tmp,aes(pal,fill=pal)) + geom_bar() + 
+  scale_fill_manual(values=tmp$pal,guide=F) +
+  theme_void()+ggtitle(pal_name)
+  return (g)
   
-palette_rick %>% 
-    filter(name==img_name) %>% 
-    select(pal) %>% 
-    unlist() %>% 
-    my_show_col(label = img_name,labels = F)  
-# BTW, If you hate verbose pipes, here is the non-dplyr way of getting the same thing.
-#by_name[by_name$name=="Wedding",]$pal[[1]] %>% show_col()
 }
-```
-![Cable](img/rm3.jpg)
-```{r}
-show_pal("Cable",palette_rick)
+
+lapply(palette_rick$name,plot_one) %>% 
+  grid.arrange(grobs=.)
+
 ```
 
-![Schwifty](img/rm1.jpg)
-```{r echo=FALSE}
-show_pal("Schwifty",palette_rick)
-```
-
-![Portal](img/rm2.jpg)
-```{r echo=FALSE}
-show_pal("Portal",palette_rick)
-```
-![Family](img/rm4.jpg)
-```{r echo=FALSE}
-show_pal("Family",palette_rick)
-```
-![Outdoor](img/rm5.jpg)
-```{r echo=FALSE}
-show_pal("Outdoor",palette_rick)
-```
-![Wedding](img/rm6.jpg)
-```{r echo=FALSE}
-show_pal("Wedding",palette_rick)
-```
 Finally, let's do what we said we'd do at the beginning, put all these images together and add it to our list column of palettes.
 ```{r}
 multi_img_pal <- gen_pal(rm_list)
@@ -320,9 +270,12 @@ rm_list <- rm_list %>% mutate(cluster=as.factor(km$cluster))
 autoplot(prcomp(rm_list[c("R","G","B")]), x=2,y=3,data = rm_list, colour = "cluster",
          loadings = TRUE, loadings.colour = 'blue',
          loadings.label = TRUE, loadings.label.size = 10) +
-  scale_color_manual(values=rgb(km$centers),guide=FALSE)+
+  scale_color_manual(values=rgb(km$centers),guide=F)+
   theme_classic()
 
 ```
 
 Now it's quite clear that the second and third principal components map to the color space even though this explains only about 25% of the variation in the data.
+
+```
+
