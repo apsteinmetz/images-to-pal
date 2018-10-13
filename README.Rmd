@@ -1,8 +1,8 @@
 ---
 title: "Rick and Morty Palettes"
 output:
-  md_document: default
   html_notebook: default
+  md_document: default
 ---
 # Rick and Morty Palettes
 
