@@ -252,9 +252,10 @@ Back to the k-means analysis.  When we created these palettes we were really ass
 num_colors = 20
 #assign each pixel to a cluster
 km <-  rm_list[c("R","G","B")] %>% kmeans(centers = num_colors, iter.max = 30)
+rm_PCA<-prcomp(rm_list[c("R","G","B")])
 
 rm_list <- rm_list %>% mutate(cluster=as.factor(km$cluster))
-autoplot(prcomp(rm_list[c("R","G","B")]), x=1,y=2,data = rm_list, colour = "cluster",
+autoplot(rm_PCA, x=1,y=2,data = rm_list, colour = "cluster",
          loadings = TRUE, loadings.colour = 'blue',
          loadings.label = TRUE, loadings.label.size = 10) +
   scale_color_manual(values=rgb(km$centers),guide=FALSE)+
@@ -267,7 +268,7 @@ We can make it clear by plotting the second and third principal component.
 
 ```{r}
 rm_list <- rm_list %>% mutate(cluster=as.factor(km$cluster))
-autoplot(prcomp(rm_list[c("R","G","B")]), x=2,y=3,data = rm_list, colour = "cluster",
+autoplot(rm_PCA, x=2,y=3,data = rm_list, colour = "cluster",
          loadings = TRUE, loadings.colour = 'blue',
          loadings.label = TRUE, loadings.label.size = 10) +
   scale_color_manual(values=rgb(km$centers),guide=F)+
@@ -277,5 +278,11 @@ autoplot(prcomp(rm_list[c("R","G","B")]), x=2,y=3,data = rm_list, colour = "clus
 
 Now it's quite clear that the second and third principal components map to the color space even though this explains only about 25% of the variation in the data.
 
+```{r}
+library(rgl)
+library(car)
+tmp<-rm_PCA$x %>% as.tibble() %>% sample_n(100)
+scatter3d(PC1~PC2+PC3,tmp,surface=FALSE,ellipsoid=T)
 ```
+
 
