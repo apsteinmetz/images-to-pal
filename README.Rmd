@@ -285,4 +285,5 @@ tmp<-rm_PCA$x %>% as.tibble() %>% sample_n(100)
 scatter3d(PC1~PC2+PC3,tmp,surface=FALSE,ellipsoid=T)
 ```
 
+Feel free to get schwifty with these palettes!
 
